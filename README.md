@@ -1,3 +1,10 @@
+## REQUIREMENTS
+
+- you need to have ffmpeg installed.
+- you need nodejs ;)
+
+<br>
+
 ## Instructions
 
 videos will be stored inside output folder (you need to create the folder 1st).
@@ -12,7 +19,6 @@ If you want you can have a web interface by compiling frontend code and place it
 
 ### 0)
 
-<br>
 
 copy .env.sample content inside 2 files you need to create:
 
@@ -28,7 +34,6 @@ IMPORTANT: fill with your data
 
 ### 1)
 
-<br>
 
 install node dependencies
 
@@ -40,7 +45,6 @@ npm i
 
 ### 2)
 
-<br>
 
 to run on development environment:
 
