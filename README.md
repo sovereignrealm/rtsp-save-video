@@ -9,11 +9,27 @@
 
 videos will be stored inside output folder (you need to create the folder 1st).
 
-If you want you can have a web interface by compiling frontend code and place it at the root of this project naming it "frontend".
+If you want you can use the web interface from this other repo: 
+https://github.com/sovereignrealm/rtsp-frontend-videos
+
+1. You will need to create an .env.production  file:
+
+```
+REACT_APP_API_URL=yourdomainhere
+REACT_APP_AUTH_USER=test
+REACT_APP_AUTH_PASSWORD=test
+REACT_APP_VIDEO_TOKEN=test
+```
+
+2. replace with your data.
+
+3. Then install the dependencies using "npm i" and compile it using "npm run build".
+
+4. Move the created build folder to the root of this project and rename it "frontend".
 
 <br>
 
-## SETUP
+## PROJECT SETUP
 
 <br>
 
