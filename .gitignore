@@ -1,0 +1,7 @@
+node_modules/
+.env.development
+.env
+.env.production
+logs/
+output/
+frontend/
