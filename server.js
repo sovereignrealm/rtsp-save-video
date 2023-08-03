@@ -9,12 +9,11 @@ const app = express();
 const cors = require('cors');
 const exec = require('child_process').exec;
 const server = require('http').Server(app);
-const basicAuth = require("./middlewares/basicAuth");
 
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
 
-const { PORT, RTSP_USER, RTSP_PASSWORD, RTSP_PORT, FILE_TIME_TO_RECORD, RTSP_IP } = process.env;
+const { PORT, START_SECRET, RTSP_USER, RTSP_PASSWORD, RTSP_PORT, FILE_TIME_TO_RECORD, RTSP_IP } = process.env;
 
 const mainLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour window
@@ -34,7 +33,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(__dirname, "frontend")));
 
-app.get('/api/files', mainLimiter, basicAuth, (req, res) => {
+app.get('/api/files', mainLimiter, (req, res) => {
     try {
         const folder = path.join(__dirname, 'output');
         fs.readdir(folder, (err, files) => {
@@ -50,13 +49,17 @@ app.get('/api/files', mainLimiter, basicAuth, (req, res) => {
     }
 })
 
-app.post("/api/start", mainLimiter, basicAuth, (req, res) => {
+app.post("/api/start", mainLimiter, (req, res) => {
     try {
         const isNumeric = (value) => {
             return /^\d+$/.test(value);
         }
         const channel = req.body.channel;
+        const secret = req.body.secretsauce;
         if (!channel || !isNumeric(channel)) return res.status(409).end();
+        if (!secret || typeof secret !== "string" || (secret !== START_SECRET)) {
+            return res.status(401).end();
+        }
         const folder = path.join(__dirname, 'output');
         const fileName = "VID_" + moment().format('YYYYMMDD_HH-mm-ss') + ".mp4";
         const filePath = folder + "/" + fileName;
@@ -87,40 +90,15 @@ app.get('/api/:videoId', mainLimiter, (req, res) => {
             }
             const video = files.find(vid => vid === videoId);
             if (!video) return res.status(409).end();
-            // Ensure there is a range given for the video
-            const range = req.headers.range;
-            if (!range) {
-                return res.status(400).send("Requires Range header");
-            }
-            const videoPath = folder + "/" + video;
-            const videoSize = fs.statSync(videoPath).size;
-            // Parse Range
-            // Example: "bytes=32324-"
-            const CHUNK_SIZE = 10 ** 6; // 1MB
-            const start = Number(range.replace(/\D/g, ""));
-            const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
-
-            // Create headers
-            const contentLength = end - start + 1;
-            const headers = {
-                "Content-Range": `bytes ${start}-${end}/${videoSize}`,
-                "Accept-Ranges": "bytes",
-                "Content-Length": contentLength,
-                "Content-Type": "video/mp4",
-            };
-
-            // HTTP Status 206 for Partial Content
-            res.writeHead(206, headers);
-            const videoStream = fs.createReadStream(videoPath, { start, end });
-            videoStream.pipe(res);
+            res.sendFile(folder + "/" + video);
         })
     } catch (error) {
         console.log("get video id error ", error);
-        return res.status(500).end();
+        return res.status(404).end();
     }
 })
 
-app.delete('/api/:videoId', mainLimiter, basicAuth, (req, res) => {
+app.delete('/api/:videoId', mainLimiter, (req, res) => {
     try {
         const videoId = decodeURI(req.params.videoId);
         const folder = path.join(__dirname, 'output');
