@@ -16,8 +16,6 @@ https://github.com/sovereignrealm/rtsp-frontend-videos
 
 ```
 REACT_APP_API_URL=yourdomainhere
-REACT_APP_AUTH_USER=test
-REACT_APP_AUTH_PASSWORD=test
 REACT_APP_VIDEO_TOKEN=test
 ```
 
