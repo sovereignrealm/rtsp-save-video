@@ -49,8 +49,12 @@ app.get('/api/files', mainLimiter, (req, res) => {
     }
 })
 
+let lock = false;
+
 app.post("/api/start", mainLimiter, (req, res) => {
     try {
+        if (lock) return res.status(425).json({ message: "Server busy" });
+        lock = true;
         const isNumeric = (value) => {
             return /^\d+$/.test(value);
         }
@@ -67,8 +71,10 @@ app.post("/api/start", mainLimiter, (req, res) => {
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.log("Error executing command " + error);
+                lock = false;
                 return res.status(409).end();
             }
+            lock = false;
             return res.status(200).end();
         });
     } catch (error) {
