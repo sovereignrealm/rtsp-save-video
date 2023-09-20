@@ -10,6 +10,7 @@ const cors = require('cors');
 const exec = require('child_process').exec;
 const server = require('http').Server(app);
 
+app.set('trust proxy', 1);
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
 
