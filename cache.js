@@ -19,6 +19,8 @@ class CamsCache {
         delete this.cams[channel];
     }
 }
-// 5 minutes ttl
-const camsCache = new CamsCache(300000);
+
+const { CACHING_TIME } = process.env;
+// ttl in miliseconds
+const camsCache = new CamsCache(+CACHING_TIME);
 module.exports = camsCache;
