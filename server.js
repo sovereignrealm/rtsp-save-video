@@ -9,6 +9,7 @@ const app = express();
 const cors = require('cors');
 const exec = require('child_process').exec;
 const server = require('http').Server(app);
+const CamsCache = require("./cache");
 
 app.set('trust proxy', 1);
 app.set('view engine', 'ejs')
@@ -50,18 +51,16 @@ app.get('/api/files', mainLimiter, (req, res) => {
     }
 })
 
-let lock = false;
-
 app.post("/api/start", mainLimiter, (req, res) => {
     try {
-        if (lock) return res.status(425).json({ message: "Server busy" });
-        lock = true;
         const isNumeric = (value) => {
             return /^\d+$/.test(value);
         }
         const channel = req.body.channel;
-        const secret = req.body.secretsauce;
         if (!channel || !isNumeric(channel)) return res.status(409).end();
+        if (CamsCache.isInCache(channel)) return res.status(425).json({ message: "Server busy" });
+        CamsCache.add(channel);
+        const secret = req.body.secretsauce;
         if (!secret || typeof secret !== "string" || (secret !== START_SECRET)) {
             return res.status(401).end();
         }
@@ -72,10 +71,10 @@ app.post("/api/start", mainLimiter, (req, res) => {
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.log("Error executing command " + error);
-                lock = false;
+                CamsCache.remove(channel);
                 return res.status(409).end();
             }
-            lock = false;
+            CamsCache.remove(channel);
             return res.status(200).end();
         });
     } catch (error) {
