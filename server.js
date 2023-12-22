@@ -71,10 +71,10 @@ app.post("/api/start", mainLimiter, (req, res) => {
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.log("Error executing command " + error);
-                CamsCache.remove(channel);
+                // CamsCache.remove(channel);
                 return res.status(409).end();
             }
-            CamsCache.remove(channel);
+            // CamsCache.remove(channel);
             return res.status(200).end();
         });
     } catch (error) {
